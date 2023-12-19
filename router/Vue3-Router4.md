@@ -131,3 +131,85 @@ router-link：使用router-link指令使用路由，to中写的路径会在路�
 
 ```
 
+
+
+## 命名路由-编程式导航
+
+**router/index.ts**
+
+```ts
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+
+// 路由表映射
+const routes: Array<RouteRecordRaw> = [
+    {
+        path: "/",
+        name: 'Login',
+        component: () => import('../components/login.vue') //引入需要用的组件
+    },
+    {
+        path: "/reg",
+        name: 'Reg',
+        component: () => import('../components/reg.vue') //引入需要用的组件
+    }
+]
+
+const router = createRouter({
+    history: createWebHistory(), //历史模式
+    routes //路由规则
+})
+
+export default router //将路由缺省暴露出去，其他文件才可访问
+```
+
+**src/App.vue**
+
+直接通过a href也可以跳转但是会刷新页面
+
+```vue
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+const router = useRouter() // router 的实例方法
+
+const toLogin = (url: string) => {
+  router.push(url)
+}
+
+
+const toReg = (url: string) => {
+  router.push({
+    path: url
+  })
+}
+
+const toLoginName = (url: string) => {
+  router.push({
+    name: url
+  })
+}
+</script>
+
+<template>
+  <div>
+    <div>
+      <h3>命名路由</h3>
+      <router-link :to="{ name: 'Login' }">Login</router-link>
+      <router-link :to="{ name: 'Reg' }" style="margin-left: 10px;">Reg</router-link>
+      <h3>a标签跳转</h3>
+      <a href="/reg">a-reg</a>
+      <h3>编程式导航</h3>
+      <button @click="toLogin('/')">字符串模式-Login</button>
+      <button @click="toReg('/reg')" style="margin-left: 10px;">对象模式-Reg</button>
+      <button @click="toLoginName('Login')" style="margin-left: 10px;">命名模式-Login</button>
+    </div>
+    <hr>
+    <router-view></router-view>
+  </div>
+</template>
+
+<style scoped></style>
+
+```
+
+
+

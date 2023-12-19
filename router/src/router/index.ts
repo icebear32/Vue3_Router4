@@ -4,10 +4,12 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 const routes: Array<RouteRecordRaw> = [
     {
         path: "/",
+        name: 'Login',
         component: () => import('../components/login.vue') //引入需要用的组件
     },
     {
         path: "/reg",
+        name: 'Reg',
         component: () => import('../components/reg.vue') //引入需要用的组件
     }
 ]
