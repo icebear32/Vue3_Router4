@@ -213,3 +213,387 @@ const toLoginName = (url: string) => {
 
 
 
+## 历史记录
+
+replace的使用
+
+横跨历史
+
+**src/App.vue**
+
+```vue
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+const router = useRouter() // router 的实例方法
+
+const toPage = (url: string) => {
+  router.replace(url)
+}
+
+const next = () => {
+  //前进 数量不限于1
+  router.go(1)
+}
+
+const prev = () => {
+  //后退
+  router.back()
+}
+</script>
+
+<template>
+    <div>
+      <h3>replace的使用</h3>
+      <h4>replace的使用 router-link</h4>
+      <router-link replace to="/">Login</router-link>
+      <router-link replace style="margin-left:10px" to="/reg">Reg</router-link>
+      <h4>replace的使用 编程式导航</h4>
+      <button @click="toPage('/')">Login</button>
+      <button @click="toPage('/reg')" style="margin-left:10px">Reg</button>
+      <h3>横跨历史</h3>
+      <button @click="next">前进</button>
+      <button @click="prev" style="margin-left:10px">后退</button>
+    </div>
+    <hr>
+    <router-view></router-view>
+  </div>
+</template>
+
+<style scoped></style>
+
+```
+
+
+
+## 路由传参
+
+
+
+### Query路由传参
+
+编程式导航 使用router push 或者 replace 的时候 改为对象形式新增 query 必须传入一个对象
+
+
+
+创建**list.json和list.vue、detail.vue**
+
+```json
+{
+    "data": [
+        {
+            "name": "电脑",
+            "price": 10000,
+            "id": 1
+        },
+        {
+            "name": "手机",
+            "price": 5000,
+            "id": 2
+        },
+        {
+            "name": "平板",
+            "price": 8000,
+            "id": 3
+        }
+    ]
+}
+```
+
+list.vue
+
+```vue
+<script setup lang="ts">
+import { data } from './list.json'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+type Item = {
+    name: string;
+    price: number;
+    id: number;
+}
+
+const toDetail = (Item: Item) => {
+    router.push({
+        name: 'Detail',
+        query: Item
+    })
+}
+</script>
+
+<template>
+    <div>列表页面</div>
+    <table cellpadding="0" class="table" border="1">
+        <thead>
+            <tr>
+                <th>商品</th>
+                <th>价格</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr :key="item.id" v-for="item in data">
+                <th>{{ item.name }}</th>
+                <th>{{ item.price }}</th>
+                <th>
+                    <button @click="toDetail(item)">详情</button>
+                </th>
+            </tr>
+        </tbody>
+    </table>
+</template>
+
+<style>
+.table {
+    width: 400px;
+}
+</style>
+
+```
+
+detail.vue
+
+**接受参数**，使用 useRoute 的 query
+
+```vue
+<script setup lang="ts">
+import { useRoute, useRouter } from 'vue-router' // 取值用：useRoute
+
+const route = useRoute()
+const router = useRouter()
+</script>
+
+<template>
+    <div>
+        <h3>详情页面</h3>
+        <button @click="router.back()">返回</button>
+        <div>品牌：{{ route.query?.name }}</div>
+        <div>价格：{{ route.query?.price }}</div>
+        <div>ID：{{ route.query?.id }}</div>
+    </div>
+</template>
+
+<style></style>
+
+```
+
+
+
+**router/index.ts**
+
+```ts
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+
+// 路由表映射
+const routes: Array<RouteRecordRaw> = [
+    {
+        path: "/list",
+        name: 'List',
+        component: () => import('../components/list.vue') //引入需要用的组件
+    },
+    {
+        path: "/detail",
+        name: 'Detail',
+        component: () => import('../components/detail.vue') //引入需要用的组件
+    }
+]
+
+const router = createRouter({
+    history: createWebHistory(), //历史模式
+    routes //路由规则
+})
+
+export default router //将路由缺省暴露出去，其他文件才可访问
+```
+
+
+
+**App.vue**
+
+```vue
+<script setup lang="ts">
+</script>
+
+<template>
+  <div>
+    <div>
+      <h3>路由传参</h3>
+      <router-link :to="{ name: 'List' }">list页面</router-link>
+    </div>
+    <hr>
+    <router-view></router-view>
+  </div>
+</template>
+
+<style scoped></style>
+
+```
+
+运行到浏览器查看，list.vue的数据可以传到detail.vue中展示
+
+
+
+### Params路由传参
+
+编程式导航 使用router push 或者 replace 的时候 改为对象形式并且只能使用name，path无效，然后传入params
+
+创建**list2.json和list2.vue、detail2.vue**
+
+list2.json
+
+```json
+{
+    "data": [
+        {
+            "name": "电脑2",
+            "price": 20000,
+            "id": 1
+        },
+        {
+            "name": "手机2",
+            "price": 10000,
+            "id": 2
+        },
+        {
+            "name": "平板2",
+            "price": 16000,
+            "id": 3
+        }
+    ]
+}
+```
+
+list2.vue
+
+```vue
+<script setup lang="ts">
+import { data } from './list2.json'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+type Item = {
+    name: string;
+    price: number;
+    id: number;
+}
+
+const toDetail2 = (item: Item) => {
+    router.push({
+        name: 'Detail2',
+        params: item
+    })
+}
+</script>
+
+<template>
+    <div>列表页面</div>
+    <h3>Params路由传参</h3>
+    <table cellpadding="0" class="table" border="1">
+        <thead>
+            <tr>
+                <th>商品</th>
+                <th>价格</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr :key="item.id" v-for="item in data">
+                <th>{{ item.name }}</th>
+                <th>{{ item.price }}</th>
+                <th>
+                    <button @click="toDetail2(item)">详情</button>
+                </th>
+            </tr>
+        </tbody>
+    </table>
+</template>
+
+<style>
+.table {
+    width: 400px;
+}
+</style>
+
+```
+
+detail2.vue
+
+```vue
+<script setup lang="ts">
+import { useRoute, useRouter } from 'vue-router' // 取值用：useRoute
+
+const route = useRoute()
+const router = useRouter()
+</script>
+
+<template>
+    <h2>详情页面</h2>
+    <div>
+        <h3>Params路由传参</h3>
+        <button @click="router.back()">返回</button>
+        <div>品牌：{{ route.params?.name }}</div>
+        <div>价格：{{ route.params?.price }}</div>
+        <div>ID：{{ route.params?.id }}</div>
+    </div>
+</template>
+
+<style></style>
+
+```
+
+**router/index.ts**
+
+```ts
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+
+// 路由表映射
+const routes: Array<RouteRecordRaw> = [
+    {
+        path: "/list2",
+        name: 'List2',
+        component: () => import('../components/demo01/list2.vue') //引入需要用的组件
+    },
+    {
+        path: "/detail2/:name/:price/:id", // 配置要传递的参数
+        name: 'Detail2',
+        component: () => import('../components/demo01/detail2.vue') //引入需要用的组件
+    }
+]
+
+const router = createRouter({
+    history: createWebHistory(), //历史模式
+    routes //路由规则
+})
+
+export default router //将路由缺省暴露出去，其他文件才可访问
+```
+
+
+
+App.vue
+
+```vue
+<script setup lang="ts">
+</script>
+
+<template>
+    <div>
+      <h3>路由传参</h3>
+      <router-link :to="{ name: 'List' }">list页面-Query路由传参</router-link>
+      <router-link :to="{ name: 'List2' }" style="margin-left: 10px;">list页面-Params路由传参</router-link>
+    </div>
+    <hr>
+    <router-view></router-view>
+  </div>
+</template>
+
+<style scoped></style>
+
+```
+
+运行到浏览器查看，list2.vue的数据可以传到detail2.vue中展示
+
+
+

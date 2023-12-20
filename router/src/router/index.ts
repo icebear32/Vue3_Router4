@@ -11,6 +11,26 @@ const routes: Array<RouteRecordRaw> = [
         path: "/reg",
         name: 'Reg',
         component: () => import('../components/reg.vue') //引入需要用的组件
+    },
+    {
+        path: "/list",
+        name: 'List',
+        component: () => import('../components/demo01/list.vue') //引入需要用的组件
+    },
+    {
+        path: "/detail",
+        name: 'Detail',
+        component: () => import('../components/demo01/detail.vue') //引入需要用的组件
+    },
+    {
+        path: "/list2",
+        name: 'List2',
+        component: () => import('../components/demo01/list2.vue') //引入需要用的组件
+    },
+    {
+        path: "/detail2/:name/:price/:id", // 配置要传递的参数
+        name: 'Detail2',
+        component: () => import('../components/demo01/detail2.vue') //引入需要用的组件
     }
 ]
 

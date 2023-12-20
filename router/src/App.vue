@@ -66,6 +66,11 @@ const prev = () => {
       <button @click="next">前进</button>
       <button @click="prev" style="margin-left:10px">后退</button>
     </div>
+    <div>
+      <h3>路由传参</h3>
+      <router-link :to="{ name: 'List' }">list页面-Query路由传参</router-link>
+      <router-link :to="{ name: 'List2' }" style="margin-left: 10px;">list页面-Params路由传参</router-link>
+    </div>
     <hr>
     <router-view></router-view>
   </div>
