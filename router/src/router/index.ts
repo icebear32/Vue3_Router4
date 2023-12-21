@@ -31,6 +31,23 @@ const routes: Array<RouteRecordRaw> = [
         path: "/detail2/:name/:price/:id", // 配置要传递的参数
         name: 'Detail2',
         component: () => import('../components/demo01/detail2.vue') //引入需要用的组件
+    },
+    {
+        path: "/father", // 配置要传递的参数
+        name: 'Father',
+        component: () => import('../components/demo02/father.vue'), //引入需要用的组件
+        children: [
+            {
+                path: "child1", // 配置要传递的参数
+                name: 'Child1',
+                component: () => import('../components/demo02/child1.vue') //引入需要用的组件
+            },
+            {
+                path: "child2", // 配置要传递的参数
+                name: 'Child2',
+                component: () => import('../components/demo02/child2.vue') //引入需要用的组件
+            }
+        ]
     }
 ]
 

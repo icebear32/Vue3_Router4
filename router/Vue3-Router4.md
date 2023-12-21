@@ -597,3 +597,122 @@ App.vue
 
 
 
+## 嵌套路由
+
+一些应用程序的 UI 由多层嵌套的组件组成
+
+
+
+在**src\components**创建目录**demo02**，并创建**father.vue，child1.vue，child2.vue**
+
+father.vue
+
+```vue
+<script setup lang="ts">
+
+</script>
+
+<template>
+    <div>
+        <h1>父路由</h1>
+        <div>
+            <router-link :to="{ name: 'Child1' }">child1</router-link>
+            <router-link :to="{ name: 'Child2' }" style="margin-left: 10px;">child2</router-link>
+        </div>
+        <router-view></router-view>
+    </div>
+</template>
+
+<style></style>
+```
+
+child1.vue
+
+```vue
+<script setup lang="ts">
+
+</script>
+
+<template>
+    <div>
+        <h2>子路由1</h2>
+    </div>
+</template>
+
+<style></style>
+```
+
+child2.vue
+
+```vue
+<script setup lang="ts">
+
+</script>
+
+<template>
+    <div>
+        <h2>子路由2</h2>
+    </div>
+</template>
+
+<style></style>
+```
+
+路由配置，**router/index.ts**，`children` 配置只是另一个路由数组
+
+```ts
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+
+// 路由表映射
+const routes: Array<RouteRecordRaw> = [
+    {
+        path: "/father", // 配置要传递的参数
+        name: 'Father',
+        component: () => import('../components/demo02/father.vue'), //引入需要用的组件
+        children: [
+            {
+                path: "child1", // 配置要传递的参数
+                name: 'Child1',
+                component: () => import('../components/demo02/child1.vue') //引入需要用的组件
+            },
+            {
+                path: "child2", // 配置要传递的参数
+                name: 'Child2',
+                component: () => import('../components/demo02/child2.vue') //引入需要用的组件
+            }
+        ]
+    }
+]
+
+const router = createRouter({
+    history: createWebHistory(), //历史模式
+    routes //路由规则
+})
+
+export default router //将路由缺省暴露出去，其他文件才可访问
+```
+
+**src/App.vue**
+
+```vue
+<script setup lang="ts">
+</script>
+
+<template>
+    <div>
+      <h3>嵌套路由</h3>
+      <router-link :to="{ name: 'Father' }">嵌套路由-父路由</router-link>
+    </div>
+    <hr>
+    <router-view></router-view>
+  </div>
+</template>
+
+<style scoped></style>
+
+```
+
+运行到浏览器，进入父路由，再点击子路由，在父路由部分继续显示子路由内容
+
+
+
