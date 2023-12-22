@@ -83,6 +83,11 @@ const prev = () => {
       <router-link to="/root">root</router-link>
     </div>
     <hr>
+    <div>
+      <h3>重定向-别名</h3>
+      <router-link to="/root1">root</router-link>
+    </div>
+    <hr>
     <router-view></router-view>
   </div>
 </template>

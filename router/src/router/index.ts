@@ -67,6 +67,41 @@ const routes: Array<RouteRecordRaw> = [
                 }
             }
         ]
+    },
+    {
+        path: '/root1',
+        component: () => import('../components/demo04/root.vue'),
+        // redirect: '/user3', //第一种：字符串形式配置，访问/ 重定向到 /user （地址栏显示/,内容为/user路由的内容）
+        // redirect: {
+        //     path: '/user3'
+        // }, // 对象形式配置
+        redirect: to => {
+            console.log(to, '=>')
+
+            return {
+                path: '/user3',
+                query: {
+                    name: 'ich'
+                }
+            }
+        }, // 函数模式（可以传参）
+        // 将 /root1 别名为 /roota，意味着当用户访问 /roota 时，URL 仍然是 /user3，但会被匹配为用户正在访问 /root1
+        alias: ['/roota', '/rootb', '/rootc'], // 别名
+        children: [
+            {
+                path: '/user3',
+                components: {
+                    default: () => import('../components/demo04/A.vue')
+                }
+            },
+            {
+                path: '/user4',
+                components: {
+                    bbb: () => import('../components/demo04/B.vue'),
+                    ccc: () => import('../components/demo04/C.vue')
+                }
+            }
+        ]
     }
 ]
 

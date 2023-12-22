@@ -716,3 +716,186 @@ export default router //将路由缺省暴露出去，其他文件才可访问
 
 
 
+## 命名视图
+
+命名视图可以在同一级（同一个组件）中展示更多的路由视图，而不是嵌套显示
+
+App.vue
+
+```vue
+<script setup lang="ts">
+</script>
+
+<template>
+    <div>
+      <h3>命名视图</h3>
+      <router-link to="/root">root</router-link>
+    </div>
+    <hr>
+    <router-view></router-view>
+  </div>
+</template>
+
+<style scoped></style>
+
+```
+
+router/index.ts
+
+```ts
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+
+// 路由表映射
+const routes: Array<RouteRecordRaw> = [
+    {
+        path: '/root',
+        component: () => import('../components/demo03/root.vue'),
+        children: [
+            {
+                path: '/user1',
+                components: {
+                    default: () => import('../components/demo03/A.vue')
+                }
+            },
+            {
+                path: '/user2',
+                components: {
+                    bbb: () => import('../components/demo03/B.vue'),
+                    ccc: () => import('../components/demo03/C.vue')
+                }
+            }
+        ]
+    }
+]
+
+const router = createRouter({
+    history: createWebHistory(), //历史模式
+    routes //路由规则
+})
+
+export default router //将路由缺省暴露出去，其他文件才可访问
+```
+
+root.vue
+
+```vue
+<template>
+    <div>
+        <router-link to="/user1">user1</router-link>
+        <router-link to="/user2" style="margin-left: 10px;">user2</router-link>
+        <hr>
+        <router-view></router-view>
+        <router-view name="bbb"></router-view>
+        <router-view name="ccc"></router-view>
+    </div>
+</template>
+```
+
+A.vue
+
+```vue
+<template>
+    <div>Aaa</div>
+</template>
+```
+
+B.vue
+
+```vue
+<template>
+    <div>Bbb</div>
+</template>
+```
+
+C.vue
+
+```vue
+<template>
+    <div>Ccc</div>
+</template>
+```
+
+
+
+## 重定向-别名
+
+访问/ 重定向到 /user （地址栏显示/,内容为/user路由的内容）
+
+
+
+将**命名视图**的root.vue、A.vue、B.vue、C.vue复制到新目录
+
+App.vue
+
+```vue
+<script setup lang="ts">
+</script>
+
+<template>
+    <div>
+      <h3>重定向-别名</h3>
+      <router-link to="/root1">root</router-link>
+    </div>
+    <hr>
+    <router-view></router-view>
+  </div>
+</template>
+
+<style scoped></style>
+
+```
+
+**router/index.tx**，进行路由配置
+
+```ts
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+
+// 路由表映射
+const routes: Array<RouteRecordRaw> = [
+    {
+        path: '/root1',
+        component: () => import('../components/demo04/root.vue'),
+        // redirect: '/user3', //第一种：字符串形式配置，访问/ 重定向到 /user （地址栏显示/,内容为/user路由的内容）
+        // redirect: {
+        //     path: '/user3'
+        // }, // 对象形式配置
+        redirect: to => {
+            console.log(to, '=>')
+
+            return {
+                path: '/user3',
+                query: {
+                    name: 'ich'
+                }
+            }
+        }, // 函数模式（可以传参）
+        // 将 /root1 别名为 /roota，意味着当用户访问 /roota 时，URL 仍然是 /user3，但会被匹配为用户正在访问 /root1
+        alias: ['/roota', '/rootb', '/rootc'], // 别名
+        children: [
+            {
+                path: '/user3',
+                components: {
+                    default: () => import('../components/demo04/A.vue')
+                }
+            },
+            {
+                path: '/user4',
+                components: {
+                    bbb: () => import('../components/demo04/B.vue'),
+                    ccc: () => import('../components/demo04/C.vue')
+                }
+            }
+        ]
+    }
+]
+
+const router = createRouter({
+    history: createWebHistory(), //历史模式
+    routes //路由规则
+})
+
+export default router //将路由缺省暴露出去，其他文件才可访问
+```
+
+
+
