@@ -48,6 +48,25 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('../components/demo02/child2.vue') //引入需要用的组件
             }
         ]
+    },
+    {
+        path: '/root',
+        component: () => import('../components/demo03/root.vue'),
+        children: [
+            {
+                path: '/user1',
+                components: {
+                    default: () => import('../components/demo03/A.vue')
+                }
+            },
+            {
+                path: '/user2',
+                components: {
+                    bbb: () => import('../components/demo03/B.vue'),
+                    ccc: () => import('../components/demo03/C.vue')
+                }
+            }
+        ]
     }
 ]
 

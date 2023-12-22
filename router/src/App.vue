@@ -78,6 +78,11 @@ const prev = () => {
       <router-link :to="{ name: 'Father' }">嵌套路由-父路由</router-link>
     </div>
     <hr>
+    <div>
+      <h3>命名视图</h3>
+      <router-link to="/root">root</router-link>
+    </div>
+    <hr>
     <router-view></router-view>
   </div>
 </template>
