@@ -899,3 +899,200 @@ export default router //将路由缺省暴露出去，其他文件才可访问
 
 
 
+## 导航守卫
+
+
+
+### 全局前置守卫
+
+**router.beforeEach**
+
+```ts
+router.beforeEach((to, form, next) => {
+    console.log(to, form);
+    next()
+})
+```
+
+* 每个守卫方法接收三个参数：
+  * to: Route， 即将要进入的目标 路由对象
+  * from: Route，当前导航正要离开的路由
+  * next(): 进行管道中的下一个钩子。如果全部钩子执行完了，则导航的状态就是 confirmed (确认的)
+  * next(false): 中断当前的导航。如果浏览器的 URL 改变了 (可能是用户手动或者浏览器后退按钮)，那么 URL 地址会重置到 from 路由对应的地址
+  * next('/') 或者 next({ path: '/' }): 跳转到一个不同的地址。当前的导航被中断，然后进行一个新的导航。
+
+
+
+案例：权限判断
+
+**src目录创建views目录，并创建 Index.vue 和 Login.vue **
+
+Index.vue
+
+```vue
+<script setup lang="ts">
+
+</script>
+
+<template>
+    Index
+</template>
+
+<style scoped>
+</style>
+
+```
+
+Login.vue
+
+```vue
+<script setup lang="ts">
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { type FormItemRule, type FormInstance, ElMessage } from 'element-plus'
+
+const router = useRouter()
+
+type Form = {
+    user: string,
+    password: string
+}
+type Rules = {
+    [k in keyof Form]?: Array<FormItemRule>
+}
+const formInline = reactive<Form>({
+    user: '',
+    password: '',
+})
+const form = ref<FormInstance>()
+const rules = reactive<Rules>({
+    user: [
+        {
+            required: true,
+            message: '请输入账号',
+            type: "string",
+        }
+    ],
+    password: [
+        {
+            required: true,
+            message: '请输入密码',
+            type: "string",
+        }
+    ]
+})
+
+const onSubmit = () => {
+    // console.log('submit!', form.value)
+    form.value?.validate((validate) => {
+        if (validate) {
+            router.push('./index')
+            localStorage.setItem('token', '1')
+        } else {
+            ElMessage.error('请输入完整')
+        }
+    })
+}
+</script>
+
+<template>
+    <div class="login">
+        <el-card class="box-card">
+            <el-form ref="form" :rules="rules" :model="formInline" class="demo-form-inline">
+                <el-form-item prop="user" label="账号：">
+                    <el-input v-model="formInline.user" placeholder="请输入账号" />
+                </el-form-item>
+                <el-form-item prop="password" label="密码：">
+                    <el-input v-model="formInline.password" type="password" placeholder="请输入密码" />
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="onSubmit">登录</el-button>
+                </el-form-item>
+            </el-form>
+        </el-card>
+    </div>
+</template>
+
+<style scoped>
+.demo-form-inline .el-input {
+    --el-input-width: 220px;
+}
+</style>
+
+```
+
+**src/router/index.ts**
+
+```ts
+import { createRouter, createWebHistory } from 'vue-router'
+
+const router = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL), //历史模式
+    routes: [
+        {
+            path: '/',
+            component: () =>import('../views/Login.vue')
+        },
+        {
+            path: '/index',
+            component: () =>import('../views/Index.vue')
+        }
+    ]
+})
+
+export default router //将路由缺省暴露出去，其他文件才可访问
+```
+
+App.vue
+
+```vue
+<script setup lang="ts">
+
+</script>
+
+<template>
+    <RouterView />
+</template>
+
+<style>
+* {
+    padding: 0;
+    margin: 0;
+}
+
+html,
+body #app {
+    height: 100%;
+    overflow: hidden;
+}</style>
+
+```
+
+main.ts
+
+```ts
+import { createApp } from 'vue'
+import './style.css'
+import App from './App.vue'
+import router from './router'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+
+const app = createApp(App)
+
+app.use(router)
+app.use(ElementPlus)
+
+const whileList = ['/']
+router.beforeEach((to, from, next) => {
+    if (whileList.includes(to.path) || localStorage.getItem('token')) {
+        next()
+    } else {
+        next('/')
+    }
+})
+
+app.mount('#app')
+
+```
+
