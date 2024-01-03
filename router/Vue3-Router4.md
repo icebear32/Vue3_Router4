@@ -1302,3 +1302,66 @@ const router = createRouter({
 export default router //将路由缺省暴露出去，其他文件才可访问
 ```
 
+
+
+## 路由过度动效
+
+想要在你的路径组件上使用转场，并对导航进行动画处理，你需要使用 **v-slot API**
+
+想让每个路由的组件有不同的过渡，可以将**元信息**和动态的 `name` 结合在一起，放在`<transition>` 上
+
+**src/router/index.ts**
+
+```ts
+import { createRouter, createWebHistory } from 'vue-router'
+
+declare module 'vue-router' {
+    interface RouteMeta {
+        title: string,
+        transition: string
+    }
+}
+
+const router = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL), //历史模式
+    routes: [
+        {
+            path: '/',
+            component: () => import('../views/Login.vue'),
+            meta: {
+                title: "登录页面",
+                transition:"animate__fadeInUp",
+            }
+        },
+        {
+            path: '/index',
+            component: () => import('../views/Index.vue'),
+            meta: {
+                title: "首页",
+                transition:"animate__bounceIn",
+            }
+        }
+    ]
+})
+
+export default router //将路由缺省暴露出去，其他文件才可访问
+```
+
+
+
+App.vue
+
+```vue
+<script setup lang="ts">
+import 'animate.css'
+</script>
+
+<template>
+    <router-view #default="{ route, Component }">
+        <transition :enter-active-class="`animate__animated ${route.meta.transition}`">
+            <component :is="Component"></component>
+        </transition>
+    </router-view>
+</template>
+```
+

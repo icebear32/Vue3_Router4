@@ -3,7 +3,7 @@
 </script>
 
 <template>
-    Index
+    <div>Index</div>
 </template>
 
 <style scoped>

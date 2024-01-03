@@ -2,7 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 declare module 'vue-router' {
     interface RouteMeta {
-        title: string
+        title: string,
+        transition: string
     }
 }
 
@@ -11,16 +12,18 @@ const router = createRouter({
     routes: [
         {
             path: '/',
-            component: () =>import('../views/Login.vue'),
+            component: () => import('../views/Login.vue'),
             meta: {
-                title: "登录页面"
+                title: "登录页面",
+                transition:"animate__fadeInUp",
             }
         },
         {
             path: '/index',
-            component: () =>import('../views/Index.vue'),
+            component: () => import('../views/Index.vue'),
             meta: {
-                title: "首页"
+                title: "首页",
+                transition:"animate__bounceIn",
             }
         }
     ]
