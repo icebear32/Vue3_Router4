@@ -1096,3 +1096,209 @@ app.mount('#app')
 
 ```
 
+
+
+### 后置守卫
+
+使用场景一般可以用来做loadingBar
+
+也可以注册全局后置钩子，然而和守卫不同的是，这些钩子不会接受 `next` 函数也不会改变导航本身
+
+```ts
+router.afterEach((to,from)=>{
+    Vnode.component?.exposed?.endLoading()
+})
+```
+
+
+
+**src/components/loadingBar.vue**，loadingBar 组件
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+
+let speed = ref<number>(1)
+let bar = ref<HTMLElement>()
+let timer = ref<number>(0)
+
+const startLoading = () => {
+    let dom = bar.value as HTMLElement
+    speed.value = 1
+    console.log(dom)
+    timer.value = window.requestAnimationFrame(function fn() {
+        if (speed.value < 90) {
+            speed.value += 1
+            dom.style.width = speed.value + '%'
+            timer.value = window.requestAnimationFrame(fn)
+        } else {
+            speed.value = 1
+            window.cancelAnimationFrame(timer.value)
+        }
+    })
+}
+const endLoading = () => {
+    let dom = bar.value as HTMLElement
+    setTimeout(() => {
+        window.requestAnimationFrame(() => {
+            speed.value = 100
+            dom.style.width = speed.value + '%'
+        })
+    }, 1000)
+}
+// onMounted(() => {
+//     startLoading()
+//     endLoading()
+// })
+
+defineExpose({
+    startLoading,
+    endLoading
+})
+</script>
+
+<template>
+    <div>
+        <div class="wraps">
+            <div ref="bar" class="bar"></div>
+        </div>
+    </div>
+</template>
+
+<style scoped lang="less">
+.wraps {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 2px;
+
+    .bar {
+        height: inherit;
+        width: 0;
+        background: blue;
+    }
+}
+</style>
+
+```
+
+**src/main.ts**
+
+```ts
+import { createApp, createVNode, render } from 'vue'
+// import './style.css'
+import App from './App.vue'
+import router from './router'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+import loadingBar from './components/loadingBar.vue'
+
+// console.log(loadingBar)
+const Vnode = createVNode(loadingBar)
+render(Vnode, document.body)
+console.log(Vnode)
+
+const app = createApp(App)
+
+app.use(router)
+app.use(ElementPlus)
+
+const whileList = ['/']
+
+// 前置守卫
+router.beforeEach((to, from, next) => {
+    Vnode.component?.exposed?.startLoading()
+    if (whileList.includes(to.path) || localStorage.getItem('token')) {
+        next()
+    } else {
+        next('/')
+    }
+})
+
+// 后置守卫
+router.afterEach((to, from) => {
+    Vnode.component?.exposed?.endLoading()
+})
+
+app.mount('#app')
+
+```
+
+
+
+## 路由元信息
+
+通过路由记录的 `meta` 属性可以定义路由的**元信息**。使用路由元信息可以在路由中附加自定义的数据，例如：
+
+- 权限校验标识
+- 路由组件的过渡名称
+- 路由组件持久化缓存 (keep-alive) 的相关配置
+- 标题名
+
+可以在**导航守卫**或者是**路由对象**中访问路由的元信息数据
+
+**src/main.ts**
+
+```ts
+// 前置守卫
+router.beforeEach((to, from, next) => {
+    if (whileList.includes(to.path) || localStorage.getItem('token')) {
+        document.title = to.meta.title
+        Vnode.component?.exposed?.startLoading()
+        next()
+    } else {
+        next('/')
+    }
+})
+```
+
+
+
+**src/router/index.ts**
+
+报错：不能将类型“unknown”分配给类型“string”
+
+解决：
+
+```ts
+declare module 'vue-router' {
+    interface RouteMeta {
+        title: string
+    }
+}
+```
+
+
+
+```ts
+import { createRouter, createWebHistory } from 'vue-router'
+
+declare module 'vue-router' {
+    interface RouteMeta {
+        title: string
+    }
+}
+
+const router = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL), //历史模式
+    routes: [
+        {
+            path: '/',
+            component: () =>import('../views/Login.vue'),
+            meta: {
+                title: "登录页面"
+            }
+        },
+        {
+            path: '/index',
+            component: () =>import('../views/Index.vue'),
+            meta: {
+                title: "首页"
+            }
+        }
+    ]
+})
+
+export default router //将路由缺省暴露出去，其他文件才可访问
+```
+

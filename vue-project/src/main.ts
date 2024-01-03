@@ -20,8 +20,9 @@ const whileList = ['/']
 
 // 前置守卫
 router.beforeEach((to, from, next) => {
-    Vnode.component?.exposed?.startLoading()
     if (whileList.includes(to.path) || localStorage.getItem('token')) {
+        document.title = to.meta.title
+        Vnode.component?.exposed?.startLoading()
         next()
     } else {
         next('/')
