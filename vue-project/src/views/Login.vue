@@ -48,6 +48,11 @@ const onSubmit = () => {
 </script>
 
 <template>
+    <div style="width: 100%;height: 1000px;background: black;">
+        <div style="color: aliceblue;font-size: 100px;">
+            滚动行为
+        </div>
+    </div>
     <div class="login">
         <el-card class="box-card">
             <el-form ref="form" :rules="rules" :model="formInline" class="demo-form-inline">

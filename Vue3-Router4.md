@@ -1365,3 +1365,55 @@ import 'animate.css'
 </template>
 ```
 
+
+
+## 滚动行为
+
+使用前端路由，当切换到新路由时，想要页面滚到顶部，或者是保持原先的滚动位置，就像重新加载页面那样。vue-router 可以自定义路由切换时页面如何滚动
+
+
+
+当创建一个 Router 实例，可以提供一个 `scrollBehavior` 方法
+
+scrollBehavior 方法接收 to 和 from 路由对象。第三个参数 savedPosition 当且仅当 popstate 导航 (通过浏览器的 前进/后退 按钮触发) 时才可用。
+
+scrollBehavior 返回滚动位置的对象信息
+
+**login.vue**
+
+```vue
+<template>
+    <div style="width: 100%;height: 1000px;background: black;">
+        <div style="color: aliceblue;font-size: 100px;">
+            滚动行为
+        </div>
+    </div>
+    <div class="login">
+        ...
+    </div>
+</template>
+```
+
+**src/router/index.ts**
+
+```ts
+const router = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL), //历史模式
+    scrollBehavior: (to, from, savePosition) => {
+        console.log(to, '==============>', savePosition);
+        return new Promise((r) => {
+            setTimeout(() => {
+                r({
+                    top: 10000
+                })
+            }, 2000);
+        })
+    },
+    routes: [
+        ...
+    ]
+})
+```
+
+
+

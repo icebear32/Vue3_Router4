@@ -9,13 +9,23 @@ declare module 'vue-router' {
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL), //历史模式
+    scrollBehavior: (to, from, savePosition) => {
+        console.log(to, '==============>', savePosition);
+        return new Promise((r) => {
+            setTimeout(() => {
+                r({
+                    top: 10000
+                })
+            }, 2000);
+        })
+    },
     routes: [
         {
             path: '/',
             component: () => import('../views/Login.vue'),
             meta: {
                 title: "登录页面",
-                transition:"animate__fadeInUp",
+                transition: "animate__fadeInUp",
             }
         },
         {
@@ -23,7 +33,7 @@ const router = createRouter({
             component: () => import('../views/Index.vue'),
             meta: {
                 title: "首页",
-                transition:"animate__bounceIn",
+                transition: "animate__bounceIn",
             }
         }
     ]
