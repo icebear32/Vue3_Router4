@@ -716,6 +716,14 @@ export default router //将路由缺省暴露出去，其他文件才可访问
 
 
 
+### 嵌套路由使用场景
+
+* 平时开发中，应用的有些界面是由多层级组件组合而来的，这种情况下，url各部分通常对应某个嵌套的组件，`vue-router`中可以使用嵌套路由表示这种关系
+* 表现形式是在两个路由间切换时，它们有公用的视图内容。此时通常提取一个父组件，内部放上`<router-view>`，从而形成物理上的嵌套，和逻辑上的嵌套对应起来。定义嵌套路由时使用`children`属性组织嵌套关系
+* 原理上是在`router-view`组件内部判断其所处嵌套层级的深度，将这个深度作为匹配组件数组`matched`的索引，获取对应渲染组件并渲染。
+
+
+
 ## 命名视图
 
 命名视图可以在同一级（同一个组件）中展示更多的路由视图，而不是嵌套显示
@@ -1414,6 +1422,65 @@ const router = createRouter({
     ]
 })
 ```
+
+
+
+## 怎么实现路由懒加载？
+
+- 当打包构建应用时，JavaScript 包会变得非常大，影响页面加载。利用路由懒加载我们能把不同路由对应的组件分割成不同的代码块，然后当路由被访问的时候才加载对应组件，这样会更加高效，是一种优化手段。
+
+- 一般来说，对所有的路由**都使用动态导入**是个好主意。
+
+- 给`component`选项配置一个返回 Promise 组件的函数就可以定义懒加载路由。例如：
+
+  `{ path: '/users/:id', component: () => import('./views/UserDetails') }`
+
+- 结合注释`() => import(/* webpackChunkName: "group-user" */ './UserDetails.vue')`可以做webpack代码分块
+
+  vite中结合[rollupOptions](https://router.vuejs.org/zh/guide/advanced/lazy-loading.html#使用-vite)定义分块
+
+- 路由中不能使用异步组件
+
+
+
+## router-link 和 router-view 的作用是什么？
+
+* vue-router`中两个重要组件`router-link`和`router-view`，分别起到路由导航和组件内容渲染作用`
+* `vue-router`会监听`popstate`事件，点击`router-link`之后页面不会刷新，而是拿出当前path去和routes中path匹配，获得匹配组件之后，^router-view`会将匹配组件渲染出来。`
+* `router-link`默认会生成a标签，点击后取消默认跳转行为而是执行一个`navigate`方法，它会`pushState`以激活事件处理函数，重新匹配出一个路由`injectedRoute`;`router-view`的渲染函数依赖这个路由，它根据该路由获取要渲染的组件并重新渲染它。
+
+
+
+## History 模式和 Hash 模式有何区别?
+
+设置模式：
+
+```ts
+const router = createRouter({
+    history: createWebHashHistory(), // Hash 模式
+    history: createWebHistory(), // History 模式
+    history: createMemoryHistory(), // Memory 模式
+})
+```
+
+用起来一样
+
+```vue
+<router-link to="/about">Go To About</router-link>
+```
+
+区别（`url`形式）
+
+```
+hash: http://xx.com/#/about
+history: http://xx.com/about
+```
+
+
+
+* `vue-router`有3个模式，其中`history`和`hash`更为常用。两者差别主要在显示形式和部署上。
+* `hash`模式在地址栏显示的时候是已哈希的形式：`#/xxx`，这种方式使用和部署都比较简单；`history`模式`url`看起来更优雅美观，但是应用在部署时需要做特殊配置，web服务器需要做回退处理，否则会出现刷新页面404的问题。
+* 在实现上不管哪种模式，最终都是通过监听`popstate`事件触发路由跳转处理，`url`显示不同只是显示效果上的差异。
 
 
 
